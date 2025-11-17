@@ -82,11 +82,10 @@ public:
     }
     
     void clearScreen() {
-        #ifdef _WIN32
-        system("cls");
-        #else
-        system("clear");
-        #endif
+        // Utiliser les codes ANSI pour effacer l'écran et repositionner le curseur
+        // Cela fonctionne sur Windows 10+, Linux et macOS
+        cout << "\033[2J\033[H";
+        cout.flush();
     }
     
     int kbhit() {
@@ -334,6 +333,15 @@ int main() {
     newt = oldt;
     newt.c_lflag &= ~(ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    #endif
+    
+    #ifdef _WIN32
+    // Activer le support ANSI sur Windows 10+
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
     #endif
     
     Game game;
